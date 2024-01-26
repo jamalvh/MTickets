@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'firebase_options.dart';
+import 'package:google_sign_in_web/google_sign_in_web.dart';
 
 // Global
 var _targetCollectionRef = FirebaseFirestore.instance.collection("messages");
@@ -541,9 +543,21 @@ class _ChatWidgetState extends State<ChatWidget> {
                           padding: const EdgeInsets.only(left: 4.0),
                           child:
                               FirebaseAuth.instance.currentUser?.uid != senderId
-                                  ? Text(
-                                      senderFirstName!,
-                                      style: const TextStyle(fontSize: 10),
+                                  ? Row(
+                                      children: [
+                                        Text(
+                                          senderFirstName!,
+                                          style: const TextStyle(fontSize: 10),
+                                        ),
+                                        const SizedBox(
+                                          width: 5,
+                                        ),
+                                        Icon(
+                                          Icons.verified,
+                                          size: 10,
+                                          color: Colors.yellow[700],
+                                        ),
+                                      ],
                                     )
                                   : Container(),
                         ),
@@ -593,8 +607,10 @@ class _ChatWidgetState extends State<ChatWidget> {
         .doc(senderId)
         .get();
 
-    var senderFirstName = senderDocSnapshot.data()?["firstName"];
-    return senderFirstName ?? "";
+    var senderName =
+        "${senderDocSnapshot.data()?["firstName"]} ${senderDocSnapshot.data()?["lastName"]}";
+
+    return senderName;
   }
 }
 
@@ -911,6 +927,33 @@ class _SignInPageState extends State<SignInPage> {
                               ),
                             ],
                           ),
+                          IconButton(
+                            onPressed: () async {
+                              try {
+                                await AuthService().signInWithGoogle();
+                                setState(() {
+                                  regSuccessMessage = 'Success!';
+                                });
+                                FirebaseFirestore.instance
+                                    .collection('users')
+                                    .doc(FirebaseAuth.instance.currentUser?.uid)
+                                    .set({
+                                  "firstName": FirebaseAuth
+                                      .instance.currentUser!.displayName!
+                                      .split(' ')[0],
+                                  "lastName": FirebaseAuth
+                                      .instance.currentUser!.displayName!
+                                      .split(' ')[1],
+                                });
+                                // ignore: use_build_context_synchronously
+                                Navigator.pushReplacementNamed(
+                                    context, '/chat');
+                              } catch (e) {
+                                null;
+                              }
+                            },
+                            icon: const Icon(Icons.sign_language_outlined),
+                          )
                         ],
                       ),
                     ],
@@ -919,6 +962,13 @@ class _SignInPageState extends State<SignInPage> {
               ),
             ],
           ),
+          // SizedBox(
+          //   height: MediaQuery.of(context).size.height * .05,
+          // ),
+          // const Text(
+          //   "Copyright MTickets LLC 2024 ©",
+          //   style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+          // ),
         ],
       ),
     );
@@ -1043,5 +1093,26 @@ class _SignInPageState extends State<SignInPage> {
         logSuccessMessage = '';
       });
     }
+  }
+}
+
+// Google Auth
+class AuthService {
+  // Google sign in
+  signInWithGoogle() async {
+    // interative sign in
+    final GoogleSignInAccount? gUser = await GoogleSignIn().signInSilently();
+
+    // obtain auth details
+    final GoogleSignInAuthentication gAuth = await gUser!.authentication;
+
+    // create new user cred
+    final credential = GoogleAuthProvider.credential(
+      accessToken: gAuth.accessToken,
+      idToken: gAuth.idToken,
+    );
+
+    // sign in with cred
+    return await FirebaseAuth.instance.signInWithCredential(credential);
   }
 }
