@@ -5,7 +5,7 @@ A safer second-hand UofM ticket exchange service in development.
 
 ## Description
 
-MTickets is a cutting-edge messaging platform designed exclusively for the University of Michigan community to facilitate secure and transparent trading of sports tickets. The platform ensures a seamless user experience through innovative features and stringent security measures.
+MTickets is a cutting-edge messaging platform designed exclusively for the University of Michigan community to facilitate secure and transparent trading of student tickets. The platform ensures a seamless user experience through innovative features and stringent security measures.
 
 ## Key Achievements
 
