@@ -30,4 +30,4 @@ MTickets is a cutting-edge messaging platform designed exclusively for the Unive
    - Utilized Firebase for storing chat data, ensuring persistent and reliable access to communication history for users.
    - Implemented efficient data handling techniques to optimize storage and retrieval processes for a seamless user experience.
 
-In developing MTickets, I have showcased my proficiency in full-stack development, security implementation, and integration of third-party authentication systems.
+In developing MTickets, I have showcased my proficiency in full-stack development, security implementation, data management, and integration of third-party authentication systems.
