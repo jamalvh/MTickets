@@ -30,4 +30,4 @@ MTickets is a cutting-edge messaging platform designed exclusively for the Unive
    - Utilized Firebase for storing chat data, ensuring persistent and reliable access to communication history for users.
    - Implemented efficient data handling techniques to optimize storage and retrieval processes for a seamless user experience.
 
-By actively contributing to the development of MTickets, I have not only enhanced the functionality of the platform but also played a pivotal role in creating a secure and user-friendly environment for the University of Michigan community to trade sports tickets. This project showcases my proficiency in full-stack development, security implementation, and integration of third-party authentication systems.
+In developing MTickets, I have showcased my proficiency in full-stack development, security implementation, and integration of third-party authentication systems.
