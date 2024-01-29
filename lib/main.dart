@@ -616,7 +616,7 @@ class _ChatWidgetState extends State<ChatWidget> {
                     ? const SizedBox(width: 15) // or 15
                     : Container(),
                 FirebaseAuth.instance.currentUser?.uid == senderId
-                    ? senderPfp != ""
+                    ? senderPfp != null
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(
                                 100.0), // Adjust the value as needed
