@@ -44,6 +44,7 @@ dependencies:
   flutter_stripe: ^10.0.0
   pay: ^1.1.2
   google_sign_in_web: ^0.12.3+2
+  adaptive_theme: ^3.6.0
   
 
 dev_dependencies:

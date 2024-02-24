@@ -9,6 +9,7 @@ import 'firebase_options.dart';
 // Global
 var _targetCollectionRef = FirebaseFirestore.instance.collection("messages");
 String recieverId = "null";
+bool showDrawer = true;
 
 void main() async {
   // Ensure that Firebase is initialized before runApp
@@ -44,7 +45,18 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData.dark(),
+      theme: ThemeData(
+        brightness: Brightness.light,
+        primarySwatch: Colors.yellow,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color.fromARGB(255, 13, 29, 61),
+          foregroundColor: Color.fromARGB(255, 246, 248, 252),
+        ),
+        drawerTheme: const DrawerThemeData(
+          backgroundColor: Color.fromARGB(255, 246, 248, 252),
+        ),
+        scaffoldBackgroundColor: Colors.white,
+      ),
       initialRoute:
           FirebaseAuth.instance.currentUser == null ? '/sign-in' : '/chat',
       routes: {
@@ -73,6 +85,7 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 45,
         elevation: 0,
         title: GestureDetector(
           onTap: () => setState(() {}),
@@ -92,6 +105,14 @@ class _ChatPageState extends State<ChatPage> {
             ],
           ),
         ),
+        leading: IconButton(
+          icon: const Icon(Icons.menu),
+          onPressed: () {
+            setState(() {
+              showDrawer = !showDrawer;
+            });
+          },
+        ),
         actions: [
           TextButton.icon(
             onPressed: () {
@@ -99,11 +120,11 @@ class _ChatPageState extends State<ChatPage> {
             },
             label: const Text(
               "1.1k",
-              style: TextStyle(color: Color.fromARGB(255, 202, 196, 208)),
+              style: TextStyle(color: Colors.white),
             ),
             icon: const Icon(
               Icons.group,
-              color: Color.fromARGB(255, 202, 196, 208),
+              color: Colors.white,
             ),
           ),
           IconButton(
@@ -118,33 +139,39 @@ class _ChatPageState extends State<ChatPage> {
       ),
       body: Row(
         children: [
-          Container(
-            width: 200,
-            color: const Color.fromARGB(255, 23, 22, 25),
+          Drawer(
+            shape: const BeveledRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(0))),
+            width: showDrawer ? 250 : 0,
             child: Column(
               children: [
                 Expanded(
                   child: ListView(
                     children: [
+                      const SizedBox(height: 15),
+                      const Padding(
+                        padding: EdgeInsets.only(top: 5.0),
+                      ),
                       Container(
                         color: _targetCollectionRef.id == 'messages'
-                            ? Colors.yellow[700]?.withOpacity(0.15)
+                            ? const Color.fromARGB(255, 211, 226, 254)
                             : Colors.transparent,
                         child: ListTile(
                           leading: Icon(
-                              _targetCollectionRef.id == 'messages'
-                                  ? Icons.group
-                                  : Icons.group_outlined,
-                              color: _targetCollectionRef.id == 'messages'
-                                  ? Colors.amber
-                                  : const Color.fromARGB(255, 230, 225, 229)),
+                            _targetCollectionRef.id == 'messages'
+                                ? Icons.group
+                                : Icons.group_outlined,
+                            color: Colors.black,
+                          ),
                           title: Text(
                             "Exchange",
                             style: TextStyle(
                                 fontSize: 16,
-                                color: _targetCollectionRef.id == 'messages'
-                                    ? Colors.amber
-                                    : const Color.fromARGB(255, 230, 225, 229)),
+                                fontWeight:
+                                    _targetCollectionRef.id == 'messages'
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                color: Colors.black),
                           ),
                           onTap: () {
                             setState(() {
@@ -159,7 +186,7 @@ class _ChatPageState extends State<ChatPage> {
                         padding: EdgeInsets.only(left: 16.0, top: 5.0),
                         child: Text(
                           "Direct Messages",
-                          style: TextStyle(fontSize: 12),
+                          style: TextStyle(fontSize: 12, color: Colors.black),
                         ),
                       ),
                       StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -209,7 +236,9 @@ class _ChatPageState extends State<ChatPage> {
                   leading: const Icon(Icons.settings_outlined),
                   title: const Text(
                     "Account",
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
                   ),
                   onTap: () {},
                 ),
@@ -245,7 +274,7 @@ class _ChatPageState extends State<ChatPage> {
                         .collection('dms')
                         .doc(dm.id)
                         .collection('dmMessages')
-                ? Colors.yellow[700]?.withOpacity(0.15)
+                ? const Color.fromARGB(255, 211, 226, 254)
                 : Colors.transparent,
             child: ListTile(
               leading: _targetCollectionRef ==
@@ -279,16 +308,17 @@ class _ChatPageState extends State<ChatPage> {
                 "$firstName $lastName",
                 style: TextStyle(
                   fontSize: 16,
-                  overflow: TextOverflow.ellipsis,
-                  color: _targetCollectionRef ==
+                  fontWeight: _targetCollectionRef ==
                           db
                               .collection('users')
                               .doc(FirebaseAuth.instance.currentUser?.uid)
                               .collection('dms')
                               .doc(dm.id)
                               .collection('dmMessages')
-                      ? Colors.amber
-                      : const Color.fromARGB(255, 230, 225, 229),
+                      ? FontWeight.bold
+                      : FontWeight.normal,
+                  overflow: TextOverflow.ellipsis,
+                  color: Colors.black,
                 ),
               ),
               onTap: () {
@@ -336,144 +366,153 @@ class _ChatWidgetState extends State<ChatWidget> {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Column(
-        children: [
-          Expanded(
-            child: StreamBuilder(
-              stream: _targetCollectionRef
-                  .orderBy("time", descending: true)
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                }
+      child: Container(
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(0)),
+        ),
+        child: Column(
+          children: [
+            Expanded(
+              child: StreamBuilder(
+                stream: _targetCollectionRef
+                    .orderBy("time", descending: true)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  }
 
-                if (!snapshot.hasData) {
-                  return const Center(child: Text("Nothing, yet!"));
-                }
+                  if (!snapshot.hasData) {
+                    return const Center(child: Text("Nothing, yet!"));
+                  }
 
-                var messages = snapshot.data?.docs ?? [];
+                  var messages = snapshot.data?.docs ?? [];
 
-                return ListView.builder(
-                  reverse: true,
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    return buildMessageWidget(messages[index]);
-                  },
-                );
-              },
+                  return ListView.builder(
+                    reverse: true,
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      return buildMessageWidget(messages[index]);
+                    },
+                  );
+                },
+              ),
             ),
-          ),
-          Container(
-            padding: const EdgeInsets.only(bottom: 10),
-            width: MediaQuery.of(context).size.width,
-            height: 50,
-            child: Row(
-              children: [
-                IconButton(onPressed: () {}, icon: const Icon(Icons.add)),
-                Expanded(
-                  child: Container(
-                    width: MediaQuery.of(context).size.width * 0.8,
-                    height: MediaQuery.of(context).size.width * 0.2,
-                    decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                      color: Colors.black26,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 20.0, bottom: 5),
-                      child: TextField(
-                        controller: _textFieldController,
-                        cursorColor: Colors.blue[700],
-                        decoration: const InputDecoration(
+            Container(
+              padding: const EdgeInsets.only(bottom: 10),
+              width: MediaQuery.of(context).size.width,
+              height: 50,
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () {},
+                    icon: const Icon(Icons.add),
+                  ),
+                  Expanded(
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      height: MediaQuery.of(context).size.width * 0.2,
+                      decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
+                        color: Colors.black12,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 20.0, bottom: 5),
+                        child: TextField(
+                          controller: _textFieldController,
+                          cursorColor: Colors.blue[700],
+                          decoration: const InputDecoration(
                             border: InputBorder.none,
-                            hintText: "say something interesting..."),
-                        onSubmitted: (value) {
-                          if (_textFieldController.text != "") {
-                            FirebaseFirestore.instance
-                                .collection('users')
-                                .doc(FirebaseAuth.instance.currentUser?.uid)
-                                .collection('dms')
-                                .doc(recieverId)
-                                .set({});
-                            _targetCollectionRef.add({
-                              "senderId":
-                                  FirebaseAuth.instance.currentUser?.uid,
-                              "text": _textFieldController.text,
-                              "time": DateTime.now(),
-                            });
-                            // Add to reciever's dmMessages fb folder (unless exchange)
-                            if (_targetCollectionRef.id != 'messages') {
+                            hintText: "Message",
+                          ),
+                          onSubmitted: (value) {
+                            if (_textFieldController.text != "") {
                               FirebaseFirestore.instance
                                   .collection('users')
+                                  .doc(FirebaseAuth.instance.currentUser?.uid)
+                                  .collection('dms')
                                   .doc(recieverId)
-                                  .collection('dms')
-                                  .doc(FirebaseAuth.instance.currentUser?.uid)
                                   .set({});
-                              FirebaseFirestore.instance
-                                  .collection('users')
-                                  .doc(recieverId) // reciever id
-                                  .collection('dms')
-                                  .doc(FirebaseAuth.instance.currentUser?.uid)
-                                  .collection('dmMessages')
-                                  .add({
+                              _targetCollectionRef.add({
                                 "senderId":
                                     FirebaseAuth.instance.currentUser?.uid,
                                 "text": _textFieldController.text,
                                 "time": DateTime.now(),
                               });
-                            }
+                              // Add to reciever's dmMessages fb folder (unless exchange)
+                              if (_targetCollectionRef.id != 'messages') {
+                                FirebaseFirestore.instance
+                                    .collection('users')
+                                    .doc(recieverId)
+                                    .collection('dms')
+                                    .doc(FirebaseAuth.instance.currentUser?.uid)
+                                    .set({});
+                                FirebaseFirestore.instance
+                                    .collection('users')
+                                    .doc(recieverId) // reciever id
+                                    .collection('dms')
+                                    .doc(FirebaseAuth.instance.currentUser?.uid)
+                                    .collection('dmMessages')
+                                    .add({
+                                  "senderId":
+                                      FirebaseAuth.instance.currentUser?.uid,
+                                  "text": _textFieldController.text,
+                                  "time": DateTime.now(),
+                                });
+                              }
 
-                            _textFieldController.text = "";
-                          }
-                        },
+                              _textFieldController.text = "";
+                            }
+                          },
+                        ),
                       ),
                     ),
                   ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    if (_textFieldController.text != "") {
-                      FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(FirebaseAuth.instance.currentUser?.uid)
-                          .collection('dms')
-                          .doc(recieverId)
-                          .set({});
-                      _targetCollectionRef.add({
-                        "senderId": FirebaseAuth.instance.currentUser?.uid,
-                        "text": _textFieldController.text,
-                        "time": DateTime.now(),
-                      });
-                      // Add to reciever's dmMessages fb folder (unless exchange)
-                      if (_targetCollectionRef.id != 'messages') {
+                  IconButton(
+                    onPressed: () {
+                      if (_textFieldController.text != "") {
                         FirebaseFirestore.instance
                             .collection('users')
+                            .doc(FirebaseAuth.instance.currentUser?.uid)
+                            .collection('dms')
                             .doc(recieverId)
-                            .collection('dms')
-                            .doc(FirebaseAuth.instance.currentUser?.uid)
                             .set({});
-                        FirebaseFirestore.instance
-                            .collection('users')
-                            .doc(recieverId) // reciever id
-                            .collection('dms')
-                            .doc(FirebaseAuth.instance.currentUser?.uid)
-                            .collection('dmMessages')
-                            .add({
+                        _targetCollectionRef.add({
                           "senderId": FirebaseAuth.instance.currentUser?.uid,
                           "text": _textFieldController.text,
                           "time": DateTime.now(),
                         });
-                      }
+                        // Add to reciever's dmMessages fb folder (unless exchange)
+                        if (_targetCollectionRef.id != 'messages') {
+                          FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(recieverId)
+                              .collection('dms')
+                              .doc(FirebaseAuth.instance.currentUser?.uid)
+                              .set({});
+                          FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(recieverId) // reciever id
+                              .collection('dms')
+                              .doc(FirebaseAuth.instance.currentUser?.uid)
+                              .collection('dmMessages')
+                              .add({
+                            "senderId": FirebaseAuth.instance.currentUser?.uid,
+                            "text": _textFieldController.text,
+                            "time": DateTime.now(),
+                          });
+                        }
 
-                      _textFieldController.text = "";
-                    }
-                  },
-                  icon: const Icon(Icons.arrow_upward_rounded),
-                ),
-              ],
+                        _textFieldController.text = "";
+                      }
+                    },
+                    icon: const Icon(Icons.arrow_upward_rounded),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -503,31 +542,41 @@ class _ChatWidgetState extends State<ChatWidget> {
                       ? GestureDetector(
                           onTapDown: (details) {
                             showMenu(
-                              context: context,
-                              position: RelativeRect.fromLTRB(
-                                  details.globalPosition.dx,
-                                  details.globalPosition.dy,
-                                  details.globalPosition.dx,
-                                  details.globalPosition.dy),
-                              items: [
-                                PopupMenuItem(
-                                  child: const Text("Message"),
-                                  onTap: () {
-                                    setState(() {
-                                      _targetCollectionRef = FirebaseFirestore
-                                          .instance
-                                          .collection('users')
-                                          .doc(FirebaseAuth
-                                              .instance.currentUser?.uid)
-                                          .collection('dms')
-                                          .doc(doc["senderId"])
-                                          .collection('dmMessages');
-                                      recieverId = doc["senderId"];
-                                    });
-                                  },
-                                ),
-                              ],
-                            );
+                                context: context,
+                                position: RelativeRect.fromLTRB(
+                                    details.globalPosition.dx,
+                                    details.globalPosition.dy,
+                                    details.globalPosition.dx,
+                                    details.globalPosition.dy),
+                                items: [
+                                  PopupMenuItem(
+                                    child: const Text(
+                                        "💬 Message                             "),
+                                    onTap: () {
+                                      setState(() {
+                                        _targetCollectionRef = FirebaseFirestore
+                                            .instance
+                                            .collection('users')
+                                            .doc(FirebaseAuth
+                                                .instance.currentUser?.uid)
+                                            .collection('dms')
+                                            .doc(doc["senderId"])
+                                            .collection('dmMessages');
+                                        recieverId = doc["senderId"];
+                                      });
+                                    },
+                                  ),
+                                  PopupMenuItem(
+                                    child: const Text("☝ Vouch               "),
+                                    onTap: () {},
+                                  ),
+                                ],
+                                elevation: 1,
+                                shape: const BeveledRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(4))),
+                                surfaceTintColor: Colors.blue[700]);
+                            // surfaceTintColor: Colors.yellow[700]);
                           },
                           child: senderPfp != null
                               ? ClipRRect(
@@ -571,32 +620,36 @@ class _ChatWidgetState extends State<ChatWidget> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.only(left: 4.0),
-                          child:
-                              FirebaseAuth.instance.currentUser?.uid != senderId
-                                  ? Row(
-                                      children: [
-                                        Text(
-                                          senderFirstName!,
-                                          style: const TextStyle(fontSize: 10),
-                                        ),
-                                        const SizedBox(
-                                          width: 5,
-                                        ),
-                                        Icon(
-                                          Icons.verified,
-                                          size: 10,
-                                          color: Colors.yellow[700],
-                                        ),
-                                      ],
-                                    )
-                                  : Container(),
+                          child: FirebaseAuth.instance.currentUser?.uid !=
+                                  senderId
+                              ? Row(
+                                  children: [
+                                    Text(
+                                      senderFirstName!,
+                                      style: const TextStyle(fontSize: 10),
+                                    ),
+                                    const SizedBox(
+                                      width: 5,
+                                    ),
+                                    Icon(
+                                      Icons.verified,
+                                      size: 10,
+                                      color: Colors.yellow[700],
+                                    ),
+                                    const SizedBox(
+                                      width: 5,
+                                    ),
+                                    Text("32", style: TextStyle(fontSize: 10))
+                                  ],
+                                )
+                              : Container(),
                         ),
                         const SizedBox(height: 2),
                         Container(
                           decoration: BoxDecoration(
                             color: FirebaseAuth.instance.currentUser?.uid ==
                                     senderId
-                                ? Colors.yellow[700]?.withOpacity(0.15)
+                                ? Colors.yellow[700]?.withOpacity(0.4)
                                 : Colors.grey.withOpacity(0.2),
                             borderRadius:
                                 const BorderRadius.all(Radius.circular(6)),
@@ -690,6 +743,7 @@ class _SignInPageState extends State<SignInPage> {
     var auth = FirebaseAuth.instance.currentUser;
     return Scaffold(
       appBar: AppBar(
+        // toolbarHeight: 50,
         elevation: 0,
         title: GestureDetector(
           onTap: () => setState(() {}),
@@ -848,8 +902,7 @@ class _SignInPageState extends State<SignInPage> {
                                       ),
                                       backgroundColor:
                                           const MaterialStatePropertyAll(
-                                        Colors.transparent,
-                                      ),
+                                              Color.fromARGB(255, 13, 29, 61)),
                                     ),
                                     child: Text(
                                       'Register',
@@ -952,7 +1005,7 @@ class _SignInPageState extends State<SignInPage> {
                                     ),
                                     backgroundColor:
                                         const MaterialStatePropertyAll(
-                                      Colors.transparent,
+                                      Color.fromARGB(255, 13, 29, 61),
                                     ),
                                   ),
                                   child: Text(
@@ -962,6 +1015,64 @@ class _SignInPageState extends State<SignInPage> {
                                 ),
                               ),
                             ],
+                          ),
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            width: 310,
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                try {
+                                  await AuthService().signInWithGoogle();
+                                  setState(() {
+                                    regSuccessMessage = 'Success!';
+                                  });
+
+                                  final userDocRef = FirebaseFirestore.instance
+                                      .collection('users')
+                                      .doc(FirebaseAuth
+                                          .instance.currentUser?.uid);
+
+                                  // Check if the user document already exists
+                                  final userDoc = await userDocRef.get();
+
+                                  if (!userDoc.exists) {
+                                    // If the document doesn't exist, it means the user is signing up
+                                    await userDocRef.set({
+                                      "firstName":
+                                          auth!.displayName!.split(' ')[0],
+                                      "lastName":
+                                          auth.displayName!.split(' ')[1],
+                                      "pfp": auth.photoURL,
+                                    });
+                                  }
+
+                                  // ignore: use_build_context_synchronously
+                                  Navigator.pushReplacementNamed(
+                                      context, '/chat');
+                                } catch (e) {
+                                  // Handle the exception
+                                  if (kDebugMode) {
+                                    print(e.toString());
+                                  }
+                                }
+                              },
+                              style: ButtonStyle(
+                                shape: MaterialStatePropertyAll(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    side: const BorderSide(
+                                        color:
+                                            Color.fromARGB(255, 251, 192, 45)),
+                                  ),
+                                ),
+                                backgroundColor: const MaterialStatePropertyAll(
+                                    Color.fromARGB(255, 13, 29, 61)),
+                              ),
+                              child: Text(
+                                'Sign In With Google',
+                                style: TextStyle(color: Colors.yellow[700]),
+                              ),
+                            ),
                           ),
                           const SizedBox(height: 10),
                           Row(
@@ -980,44 +1091,6 @@ class _SignInPageState extends State<SignInPage> {
                               ),
                             ],
                           ),
-                          IconButton(
-                            onPressed: () async {
-                              try {
-                                await AuthService().signInWithGoogle();
-                                setState(() {
-                                  regSuccessMessage = 'Success!';
-                                });
-
-                                final userDocRef = FirebaseFirestore.instance
-                                    .collection('users')
-                                    .doc(
-                                        FirebaseAuth.instance.currentUser?.uid);
-
-                                // Check if the user document already exists
-                                final userDoc = await userDocRef.get();
-
-                                if (!userDoc.exists) {
-                                  // If the document doesn't exist, it means the user is signing up
-                                  await userDocRef.set({
-                                    "firstName":
-                                        auth!.displayName!.split(' ')[0],
-                                    "lastName": auth.displayName!.split(' ')[1],
-                                    "pfp": auth.photoURL,
-                                  });
-                                }
-
-                                // ignore: use_build_context_synchronously
-                                Navigator.pushReplacementNamed(
-                                    context, '/chat');
-                              } catch (e) {
-                                // Handle the exception
-                                if (kDebugMode) {
-                                  print(e.toString());
-                                }
-                              }
-                            },
-                            icon: const Icon(Icons.sign_language_outlined),
-                          )
                         ],
                       ),
                     ],
@@ -1165,7 +1238,7 @@ class AuthService {
   // Google sign in
   signInWithGoogle() async {
     // interative sign in
-    final GoogleSignInAccount? gUser = await GoogleSignIn().signInSilently();
+    final GoogleSignInAccount? gUser = await GoogleSignIn().signIn();
 
     // obtain auth details
     final GoogleSignInAuthentication gAuth = await gUser!.authentication;
