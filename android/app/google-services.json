@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "287727538614",
+    "project_id": "worldchat-fc10f",
+    "storage_bucket": "worldchat-fc10f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:287727538614:android:de5281c5d4037d77963117",
+        "android_client_info": {
+          "package_name": "com.example.worldchat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBgEAx8oDgWFsbAkkdtClNP-VnVh_KyNG0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
